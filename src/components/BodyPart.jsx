@@ -3,7 +3,7 @@ import {Stack, Typography} from "@mui/material"
 
 import Icon from "../assets/icons/gym.png"
 
-function BodyPart({item, bodyPart, setBodyPart, setSearch, handleSearch}) {
+function BodyPart({item, bodyPart, setBodyPart, handleSearch}) {
   return (
     <Stack type="button" alignItems="center" justifyContent="center" 
         className='bodyPart-card'

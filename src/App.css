@@ -4,9 +4,19 @@
   box-sizing: border-box;
 }
 
+:root {
+  --darkRed: #994B4C;
+  --red: #E6171A;
+  --white: #FFFAFB;
+  --yellow: #E5E325;
+  --blue: #32A2E6;
+  --darkBlue: #266E99;
+
+}
+
 body {
     font-family: 'Josefin Sans';
-    background-color: #FFFAFB;
+    background-color: var(--white);
   }
   
   ::-webkit-scrollbar {
@@ -22,7 +32,7 @@ body {
   .hero-banner-img {
     position: absolute;
     right: 40px;
-    top: 0px;
+    top: 100px;
     width: 600px;
     height: 800px;
     margin-top: -200px;
@@ -63,8 +73,8 @@ body {
   }
   
   .search-btn:hover {
-    color: #FF2625 !important;
-    border: 1px solid #FF2625 !important;
+    color: var(--red) !important;
+    border: 1px solid var(--red) !important;
   }
   
   .exercise-video {

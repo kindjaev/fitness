@@ -2,11 +2,12 @@ import React from 'react'
 import {useState, useEffect} from "react"
 import {useParams} from "react-router-dom"
 import {Box} from "@mui/material"
-import {fetchData, exerciseOptions, youtubeOptions} from "../utils/fetchData"
+import {fetchData} from "../utils/fetchData"
 import Details from '../components/Details'
 import ExerciseVideos from '../components/ExerciseVideos'
 import SimilarExercises from '../components/SimilarExercises'
 import Loader from '../components/Loader'
+import { useAuthContext } from '../hooks/useAuthContext'
 
 function ExerciseDetail() {
   const [similarEquipment, setSimilarEquipment] = useState([])
@@ -14,37 +15,47 @@ function ExerciseDetail() {
   const [exerciseDetail, setExerciseDetail] = useState({})
   const [youtubeData, setYoutubeData] = useState([]) 
   const {id} = useParams()
+  const {user} = useAuthContext()
 
 
   useEffect(() => {
-    const exerciseDbUrl = 'https://exercisedb.p.rapidapi.com/exercises/exercise/'
-    const youtubeSearchUrl = 'https://youtube-search-and-download.p.rapidapi.com/search?query='
-    const exerciseSimilarDbUrl = 'https://exercisedb.p.rapidapi.com/exercises'
+    const url =  `http://localhost:3000/exercise/${id}`
 
     const exerciseDetailFetch = async () => {
-      const exerciseDetailData = await fetchData(exerciseDbUrl + id, exerciseOptions)
-      setExerciseDetail(exerciseDetailData)
-
-      const exerciseVideoData = await fetchData(youtubeSearchUrl + exerciseDetailData.name + "exercise", youtubeOptions)
-      setYoutubeData(exerciseVideoData.contents)
-
-      const exercisesData = await fetchData(exerciseSimilarDbUrl, exerciseOptions)
-
-      const similarMuscleGroupDb = await exercisesData.filter(item => item.target.includes(exerciseDetailData.target))
+      // GET ALL DATA FROM EXERCISE WITH ID
+      const exerciseDetailData = await fetchData(url, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      })
+      console.log(exerciseDetailData)
+      // set exercise details 
+      setExerciseDetail(exerciseDetailData.exercise)
+      // set youtube data
+      setYoutubeData(exerciseDetailData.youtubeExercises.contents)
+      // find similar exercises by filtering data with target and set it to variable
+      const similarMuscleGroupDb = await exerciseDetailData.similarExercises.filter(item => item.target.includes(exerciseDetailData.exercise.target))
       setSimilarExercises(similarMuscleGroupDb)
-
-      const similarEquipmentDb = await exercisesData.filter(item => item.equipment.includes(exerciseDetailData.equipment))
+      // find similar equipment by filtering data with equipment and set it to variable
+      const similarEquipmentDb = await exerciseDetailData.similarExercises.filter(item => item.equipment.includes(exerciseDetailData.exercise.equipment))
       setSimilarEquipment(similarEquipmentDb)
     }
-    exerciseDetailFetch()
-  }, [id])
+    if(user){
+      exerciseDetailFetch()
+    }
+  }, [id, user])
 
   return (
-    <Box>
-      <Details exerciseDetail={exerciseDetail}/>
-      {youtubeData.length ? <ExerciseVideos youtubeData={youtubeData} name={exerciseDetail.name}/> : <Loader />}
-        <SimilarExercises similarExercises={similarExercises} similarEquipment={similarEquipment} /> 
-    </Box>
+    <div>
+      {user &&
+        <Box>
+          <Details exerciseDetail={exerciseDetail}/>
+          {youtubeData.length ? <ExerciseVideos youtubeData={youtubeData} name={exerciseDetail.name}/> : <Loader />}
+          <SimilarExercises similarExercises={similarExercises} similarEquipment={similarEquipment} /> 
+        </Box>
+      }
+    </div>
+   
   )
 }
 
